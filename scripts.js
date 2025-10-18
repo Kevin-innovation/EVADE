@@ -865,7 +865,7 @@
     else { x = randRange(0, canvas.width); y = canvas.height + margin; }
     const waveScale = 1 + Math.min(3.0, timeAlive / 90);
     enemies.push({ type:'elite', x, y, r: 16, speed: 90*waveScale, hp: 200*waveScale, touchDps: 12*waveScale, hitTime: 0, aura: 1 });
-    effects.push({ kind:'banner', t:1.6, max:1.6, text:'?섎━???깆옣!' });
+    effects.push({ kind:'banner', t:1.6, max:1.6, text:'ELITE!' });
     sfx('elite');
   }
 
@@ -875,7 +875,7 @@
     const waveScale = 1 + Math.min(4.0, timeAlive / 60);
     const hp = 2000*waveScale;
     enemies.push({ type:'boss', name:'Void Titan', x, y, r: 28, speed: 70*waveScale, hp, maxHp: hp, touchDps: 25*waveScale, hitTime: 0, fireT: 1.5, fireCd: 2.5, fireMode: 'ring' });
-    effects.push({ kind:'banner', t:2.0, max:2.0, text:'蹂댁뒪 ?깆옣!' });
+    effects.push({ kind:'banner', t:2.0, max:2.0, text:'BOSS!' });
     sfx('boss');
   }
 
@@ -946,7 +946,7 @@
     const { stageNum, waveInStageNum, waveIndex } = currentWaveFromTime(timeAlive);
     if (waveIndex !== lastWaveIdx) {
       lastWaveIdx = waveIndex;
-      effects.push({ kind:'banner', t: 1.8, max: 1.8, text: `스테이지  — 웨이브 ` });
+      effects.push({ kind:'banner', t: 1.8, max: 1.8, text: 'STAGE ' + stageNum + '  WAVE ' + waveInStageNum });
       sfx('wave');
     }
     stage = stageNum; waveInStage = waveInStageNum;
@@ -1480,6 +1480,7 @@
   // Start at menu
   gotoMenu();
 })();
+
 
 
 
