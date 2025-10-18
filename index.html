@@ -3,119 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Language" content="ko">
     <title>EVADE</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="main-menu" class="screen visible">
         <h1 class="title">EVADE</h1>
         <div class="menu-buttons">
-            <button id="btn-start">寃뚯엫 ?쒖옉</button>
-            <button id="btn-upgrades">?곌뎄 媛뺥솕</button>
-            <button id="btn-characters">罹먮┃???좏깮</button>
-            <button id="btn-settings">?ㅼ젙</button>
+            <button id="btn-start">게임 시작</button>
+            <button id="btn-upgrades">연구 강화</button>
+            <button id="btn-characters">캐릭터 선택</button>
+            <button id="btn-settings">설정</button>
         </div>
-        <p class="hint">?대룞: ?붿궡?? 怨듦꺽: Space, ?ㅽ궗: QWER</p>
+        <p class="hint">이동: 화살표, 공격: Space, 스킬: QWER</p>
     </div>
 
     <div id="char-select" class="screen hidden">
-        <h2 class="title" style="font-size:28px">罹먮┃???좏깮</h2>
+        <h2 class="title" style="font-size:28px">캐릭터 선택</h2>
         <div class="char-grid">
             <button class="char-card" data-char="Aegis">
                 <img class="char-img" src="img/1.png" alt="Aegis">
                 <div>
-                  <div class="char-name">?꾩씠湲곗뒪 (Aegis)</div>
-                  <div class="char-desc">洹쇱젒 ?깆빱. 諛⑹뼱/愿묒뿭 ?쒖뼱.</div>
-                  <div class="char-stats">HP ?믪쓬, 諛⑹뼱 ?믪쓬, ?댁냽 蹂댄넻</div>
+                  <div class="char-name">아이기스 (Aegis)</div>
+                  <div class="char-desc">근접 탱커. 방어/광역 제어.</div>
+                  <div class="char-stats">HP 높음, 방어 높음, 이속 보통</div>
                 </div>
             </button>
             <button class="char-card" data-char="Lumina">
                 <img class="char-img" src="img/2.png" alt="Lumina">
                 <div>
-                  <div class="char-name">猷⑤???(Lumina)</div>
-                  <div class="char-desc">?먭굅由?愿묒뿭 留덈쾿??</div>
-                  <div class="char-stats">怨듦꺽???믪쓬, ?댁냽 蹂댄넻</div>
+                  <div class="char-name">루미나 (Lumina)</div>
+                  <div class="char-desc">원거리 광역 마법사.</div>
+                  <div class="char-stats">공격력 높음, 이속 보통</div>
                 </div>
             </button>
             <button class="char-card" data-char="Sylva">
                 <img class="char-img" src="img/3.png" alt="Sylva">
                 <div>
-                  <div class="char-name">?ㅻ컮 (Sylva)</div>
-                  <div class="char-desc">洹몃┝??沅곸닔. 愿???붿궡/吏?띾뵜.</div>
-                  <div class="char-stats">?먭굅由? ?댁냽 蹂댄넻</div>
+                  <div class="char-name">실바 (Sylva)</div>
+                  <div class="char-desc">그림자 궁수. 관통 화살/지속딜.</div>
+                  <div class="char-stats">원거리, 이속 보통</div>
                 </div>
             </button>
             <button class="char-card" data-char="Zed">
                 <img class="char-img" src="img/4.png" alt="Zed">
                 <div>
-                  <div class="char-name">?쒕뱶 (Zed)</div>
-                  <div class="char-desc">諛ㅼ쓽 ?붿궡?? 湲곗뒿/?뚰뵾.</div>
-                  <div class="char-stats">洹쇱젒, 湲곕룞??/div>
+                  <div class="char-name">제드 (Zed)</div>
+                  <div class="char-desc">밤의 암살자. 기습/회피.</div>
+                  <div class="char-stats">근접, 기동성</div>
                 </div>
             </button>
             <button class="char-card" data-char="Gaia">
                 <img class="char-img" src="img/5.png" alt="Gaia">
                 <div>
-                  <div class="char-name">媛?댁븘 (Gaia)</div>
-                  <div class="char-desc">?吏???뚯닔袁? 諛⑸꼍/異⑷꺽??</div>
-                  <div class="char-stats">?깆빱, ?쒖뼱</div>
+                  <div class="char-name">가이아 (Gaia)</div>
+                  <div class="char-desc">대지의 파수꾼. 방벽/충격파.</div>
+                  <div class="char-stats">탱커, 제어</div>
                 </div>
             </button>
             <button class="char-card" data-char="Seraph">
                 <img class="char-img" src="img/6.png" alt="Seraph">
                 <div>
-                  <div class="char-name">?몃씪??(Seraph)</div>
-                  <div class="char-desc">?곹샎 移섏쑀?? ?뚮났/蹂댄샇.</div>
-                  <div class="char-stats">吏?먭?, ?앹〈</div>
+                  <div class="char-name">세라프 (Seraph)</div>
+                  <div class="char-desc">영혼 치유사. 회복/보호.</div>
+                  <div class="char-stats">지원가, 생존</div>
                 </div>
             </button>
             <button class="char-card" data-char="Chrono">
                 <img class="char-img" src="img/7.png" alt="Chrono">
                 <div>
-                  <div class="char-name">?щ줈??(Chrono)</div>
-                  <div class="char-desc">?쒓컙 ?ы뻾?? ?쒓컙 ?쒓끝.</div>
-                  <div class="char-stats">?쒖뼱, 踰꾩뒪??/div>
+                  <div class="char-name">크로노 (Chrono)</div>
+                  <div class="char-desc">시간 여행자. 시간 왜곡.</div>
+                  <div class="char-stats">제어, 버스트</div>
                 </div>
             </button>
             <button class="char-card" data-char="Mad-doc">
                 <img class="char-img" src="img/8.png" alt="Mad-doc">
                 <div>
-                  <div class="char-name">留ㅻ뱶??(Mad-doc)</div>
-                  <div class="char-desc">誘몄튂愿묒씠 ?곌툑?좎궗. ??빟/?붾쾭??</div>
-                  <div class="char-stats">吏?띾뵜, 蹂移?/div>
+                  <div class="char-name">매드독 (Mad-doc)</div>
+                  <div class="char-desc">미치광이 연금술사. 폭약/디버프.</div>
+                  <div class="char-stats">지속딜, 변칙</div>
                 </div>
             </button>
         </div>
         <div class="menu-buttons">
-            <button id="btn-char-back">?ㅻ줈</button>
-            <button id="btn-char-play" disabled>?좏깮?섍퀬 ?쒖옉</button>
+            <button id="btn-char-back">뒤로</button>
+            <button id="btn-char-play" disabled>선택하고 시작</button>
         </div>
     </div>
 
     <div id="upgrades-menu" class="screen hidden">
-        <h2 class="title" style="font-size:28px">?곌뎄 媛뺥솕</h2>
-        <div class="hint">硫뷀? 吏꾪뻾: 寃뚯엫 醫낅즺 ??怨⑤뱶媛 ?곷┰?⑸땲??</div>
-        <div class="menu-wallet">蹂댁쑀 怨⑤뱶: <span id="wallet-gold">0</span></div>
+        <h2 class="title" style="font-size:28px">연구 강화</h2>
+        <div class="hint">메타 진행: 게임 종료 시 골드가 적립됩니다.</div>
+        <div class="menu-wallet">보유 골드: <span id="wallet-gold">0</span></div>
         <div class="upgrade-grid">
-            <button class="upgrade-card" data-upg="hp">湲곕낯 泥대젰 +10<br><small>鍮꾩슜: 20</small></button>
-            <button class="upgrade-card" data-upg="power">湲곕낯 怨듦꺽??+5%<br><small>鍮꾩슜: 30</small></button>
-            <button class="upgrade-card" data-upg="gold">怨⑤뱶 ?띾뱷 +10%<br><small>鍮꾩슜: 25</small></button>
-            <button class="upgrade-card" data-upg="xp">寃쏀뿕移??띾뱷 +5%<br><small>鍮꾩슜: 25</small></button>
+            <button class="upgrade-card" data-upg="hp">기본 체력 +10<br><small>비용: 20</small></button>
+            <button class="upgrade-card" data-upg="power">기본 공격력 +5%<br><small>비용: 30</small></button>
+            <button class="upgrade-card" data-upg="gold">골드 획득 +10%<br><small>비용: 25</small></button>
+            <button class="upgrade-card" data-upg="xp">경험치 획득 +5%<br><small>비용: 25</small></button>
         </div>
         <div class="menu-buttons">
-            <button id="btn-upg-back">?ㅻ줈</button>
+            <button id="btn-upg-back">뒤로</button>
         </div>
     </div>
 
     <div id="settings-menu" class="screen hidden">
-        <h2 class="title" style="font-size:28px">?ㅼ젙</h2>
-        <div class="menu-wallet" style="margin-bottom:4px">?ㅻ뵒???ㅼ젙</div>
+        <h2 class="title" style="font-size:28px">설정</h2>
+        <div class="menu-wallet" style="margin-bottom:4px">오디오 설정</div>
         <div style="display:grid;gap:10px;min-width:280px">
-            <label>留덉뒪??蹂쇰ⅷ: <input id="vol-master" type="range" min="0" max="100" value="70"> <span id="vol-label">70</span>%</label>
-            <label><input id="mute-toggle" type="checkbox"> ?뚯냼嫄?(?⑥텞?? M)</label>
+            <label>마스터 볼륨: <input id="vol-master" type="range" min="0" max="100" value="70"> <span id="vol-label">70</span>%</label>
+            <label><input id="mute-toggle" type="checkbox"> 음소거 (단축키: M)</label>
         </div>
         <div class="menu-buttons" style="margin-top:10px">
-            <button id="btn-settings-back">?ㅻ줈</button>
+            <button id="btn-settings-back">뒤로</button>
         </div>
     </div>
 
@@ -138,9 +142,9 @@
             </div>
         </div>
         <div class="hud-right">
-            <div>泥섏튂: <span id="kill-count">0</span></div>
-            <div>怨⑤뱶: <span id="gold-count">0</span></div>
-            <div>Wave: <span id="wave-label">1-1</span></div>
+            <div>처치: <span id="kill-count">0</span></div>
+            <div>골드: <span id="gold-count">0</span></div>
+            <div>웨이브: <span id="wave-label">1-1</span></div>
         </div>
     </div>
 
@@ -151,8 +155,8 @@
 
     <div id="levelup-overlay" class="overlay hidden">
         <div class="card-panel">
-            <h2>?덈꺼 ??</h2>
-            <p>?섎굹瑜??좏깮?섏꽭??/p>
+            <h2>레벨 업!</h2>
+            <p>하나를 선택하세요</p>
             <div class="cards">
                 <button class="card" data-slot="0"></button>
                 <button class="card" data-slot="1"></button>
@@ -163,26 +167,26 @@
 
     <div id="gameover-overlay" class="overlay hidden">
         <div class="card-panel">
-            <h2>寃뚯엫 ?ㅻ쾭</h2>
+            <h2>게임 오버</h2>
             <div class="results">
-                <div>?앹〈 ?쒓컙: <span id="result-time">00:00</span></div>
-                <div>理쒖쥌 Wave: <span id="result-wave">1-1</span></div>
-                <div>泥섏튂 ?? <span id="result-kills">0</span></div>
-                <div>?띾뱷 怨⑤뱶: <span id="result-gold">0</span></div>
+                <div>생존 시간: <span id="result-time">00:00</span></div>
+                <div>최종 웨이브: <span id="result-wave">1-1</span></div>
+                <div>처치 수: <span id="result-kills">0</span></div>
+                <div>획득 골드: <span id="result-gold">0</span></div>
             </div>
             <div class="menu-buttons">
-                <button id="btn-retry">?ㅼ떆 ?섍린</button>
-                <button id="btn-exit">硫붿씤 硫붾돱</button>
+                <button id="btn-retry">다시 하기</button>
+                <button id="btn-exit">메인 메뉴</button>
             </div>
         </div>
     </div>
 
     <div id="pause-overlay" class="overlay hidden">
         <div class="card-panel">
-            <h2>?쇱떆 ?뺤?</h2>
+            <h2>일시 정지</h2>
             <div class="menu-buttons">
-                <button id="btn-resume">怨꾩냽?섍린 (ESC)</button>
-                <button id="btn-exit2">硫붿씤 硫붾돱</button>
+                <button id="btn-resume">계속하기 (ESC)</button>
+                <button id="btn-exit2">메인 메뉴</button>
             </div>
         </div>
     </div>
@@ -190,11 +194,10 @@
     <canvas id="game"></canvas>
 
     <div id="wavebar" class="wavebar hidden">
-        <div class="wave-info"><span id="wave-text">Stage 1 ??Wave 1</span><span class="wave-eta" id="wave-eta">+30.0s</span></div>
+        <div class="wave-info"><span id="wave-text">스테이지 1 • 웨이브 1</span><span class="wave-eta" id="wave-eta">+30.0s</span></div>
         <div class="bar wave"><div class="fill" id="wave-fill"></div></div>
     </div>
 
     <script src="scripts.js" charset="utf-8" defer></script>
 </body>
 </html>
-

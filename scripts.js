@@ -477,35 +477,35 @@
   // Upgrades
   const UPGRADES = [
     {
-      id: 'pwr1', name: 'Power +30%', desc: 'Increase base power 30%', weight: 1.0, maxStacks: 6,
+      id: 'pwr1', name: '힘 +30%', desc: '기본 공격력 30% 증가', weight: 1.0, maxStacks: 6,
       apply: () => player.power *= 1.3
     },
     {
-      id: 'spd1', name: 'Move Speed +10%', desc: 'Increase move speed 10%', weight: 0.9, maxStacks: 5,
+      id: 'spd1', name: '이동 속도 +10%', desc: '이동 속도 10% 증가', weight: 0.9, maxStacks: 5,
       apply: () => player.speed *= 1.10
     },
     {
-      id: 'hp1', name: 'Max HP +20', desc: 'Max HP +20, instantly heal', weight: 1.0, maxStacks: 8,
+      id: 'hp1', name: '최대 체력 +20', desc: '최대 체력 +20, 즉시 회복', weight: 1.0, maxStacks: 8,
       apply: () => { player.maxHp += 20; player.hp = Math.min(player.maxHp, player.hp + 20); }
     },
     {
-      id: 'cd1', name: 'Cooldown -15%', desc: 'Slash cooldown -15%', weight: 0.7, maxStacks: 3,
+      id: 'cd1', name: '쿨타임 -15%', desc: '슬래시 쿨타임 15% 감소', weight: 0.7, maxStacks: 3,
       apply: () => player.slashCooldown = Math.max(0.15, player.slashCooldown * 0.85)
     },
     {
-      id: 'rng1', name: 'Pickup Range +30%', desc: 'Increase XP pickup range', weight: 0.8, maxStacks: 4,
+      id: 'rng1', name: '줍기 범위 +30%', desc: '경험치 보석 흡수 범위 증가', weight: 0.8, maxStacks: 4,
       apply: () => player.pickupRange *= 1.30
     },
     {
-      id: 'sr1', name: 'Slash Radius +20%', desc: 'Increase slash radius (capped)', weight: 0.6, maxStacks: 3,
+      id: 'sr1', name: '슬래시 범위 +20%', desc: '슬래시 반경 20% 증가 (상한 적용)', weight: 0.6, maxStacks: 3,
       apply: () => { player.slashRange = Math.min(player.slashRange * 1.20, player.slashRangeMax); }
     },
     {
-      id: 'sd1', name: 'Slash Damage +40%', desc: 'Increase slash damage 40%', weight: 0.9, maxStacks: 5,
+      id: 'sd1', name: '슬래시 피해 +40%', desc: '슬래시 피해 40% 증가', weight: 0.9, maxStacks: 5,
       apply: () => player.power *= 1.40
     },
     {
-      id: 'crit1', name: 'Crit Chance +5%', desc: 'Increase crit chance +5%', weight: 0.8, maxStacks: 6,
+      id: 'crit1', name: '치명타 +5%', desc: '치명타 확률 +5%', weight: 0.8, maxStacks: 6,
       apply: () => player.crit = Math.min(0.75, player.crit + 0.05)
     }
   ];
@@ -654,6 +654,7 @@
     elLevelUp.classList.add('hidden');
     elGameOver.classList.add('hidden');
     elPause.classList.add('hidden');
+    if (waveBar) waveBar.classList.remove('hidden');
     state = 'RUNNING';
   }
 
@@ -667,6 +668,7 @@
   function resumeGame() {
     if (state !== 'PAUSED') return;
     elPause.classList.add('hidden');
+    if (waveBar) waveBar.classList.remove('hidden');
     state = 'RUNNING';
   }
 
@@ -944,7 +946,7 @@
     const { stageNum, waveInStageNum, waveIndex } = currentWaveFromTime(timeAlive);
     if (waveIndex !== lastWaveIdx) {
       lastWaveIdx = waveIndex;
-      effects.push({ kind:'banner', t: 1.8, max: 1.8, text: `STAGE ${stageNum} ??WAVE ${waveInStageNum}` });
+      effects.push({ kind:'banner', t: 1.8, max: 1.8, text: `스테이지  — 웨이브 ` });
       sfx('wave');
     }
     stage = stageNum; waveInStage = waveInStageNum;
@@ -1151,7 +1153,17 @@
     timeLabel.textContent = fmtTime(timeAlive);
     killLabel.textContent = String(kills);
     goldLabel.textContent = String(gold);
-    waveLabel.textContent = `${stage}-${waveInStage}`;
+    waveLabel.textContent = ${stage}-;
+
+    // Wave progress bar
+    if (waveBar) {
+      const waveDuration = 30;
+      const tIn = timeAlive - Math.floor(timeAlive / waveDuration) * waveDuration;
+      const ratio = Math.max(0, Math.min(1, tIn / waveDuration));
+      if (waveFill) waveFill.style.width = (ratio*100).toString() + %;
+      if (waveText) waveText.textContent = (스테이지  + stage +  • 웨이브  + waveInStage);
+      if (waveEta) waveEta.textContent = (+ + (waveDuration - tIn).toFixed(1) + s);
+    }
 
 
     // Wave progress bar
@@ -1479,6 +1491,11 @@
   // Start at menu
   gotoMenu();
 })();
+
+
+
+
+
 
 
 
