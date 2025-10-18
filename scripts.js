@@ -4,6 +4,7 @@
 
   // DOM
   const canvas = document.getElementById('game');
+  const hazards = [];
   const ctx = canvas.getContext('2d');
 
   const elMenu = document.getElementById('main-menu');
@@ -289,6 +290,11 @@
           } else if (e.type === 'boss') {
             chests.push({ x: e.x, y: e.y, r: 10, gold: 50 });
           } else {
+            if (e.type === 'splitter' && !e.child) {
+              for (let s = 0; s < 2; s++) {
+                enemies.push({ type:'splitling', x: e.x + (Math.random()*10-5), y: e.y + (Math.random()*10-5), r: 9, speed: e.speed*1.2, hp: 10, touchDps: 4, hitTime: 0, child: true });
+              }
+            }
             gems.push({ x: e.x, y: e.y, r: 5, value: 8 });
             if (Math.random() < 0.08) heals.push({ x: e.x, y: e.y, r: 6 });
             const upgMeta = getUpgrades();
@@ -314,6 +320,11 @@
         if (e.hp <= 0) {
           enemies.splice(i, 1);
           kills++;
+          if (e.type === 'splitter' && !e.child) {
+            for (let s = 0; s < 2; s++) {
+              enemies.push({ type:'splitling', x: e.x + (Math.random()*10-5), y: e.y + (Math.random()*10-5), r: 9, speed: e.speed*1.2, hp: 10, touchDps: 4, hitTime: 0, child: true });
+            }
+          }
           gems.push({ x: e.x, y: e.y, r: 5, value: 8 });
           if (Math.random() < 0.08) heals.push({ x: e.x, y: e.y, r: 6 });
           const upgMeta = getUpgrades();
@@ -634,6 +645,9 @@
   function startGame() {
     // Reset
     enemies.length = 0; gems.length = 0; effects.length = 0; projectiles.length = 0; heals.length = 0; chests.length = 0; popups.length = 0;
+    hazards.length = 0;
+    hazards.length = 0;
+    hazards.length = 0;
     for (const k in upgradeCounts) delete upgradeCounts[k];
     player.x = canvas.width * 0.5; player.y = canvas.height * 0.5;
     player.cdr = 0; player.pickupRange = 120; player.slashRange = 70; player.slashRangeMax = 160; player.slashCooldown = 0.45; player.slashReadyIn = 0;
@@ -755,6 +769,7 @@
     // stop any camera shake/effects and clear lingering entities
     shake.t = 0; shake.max = 0; shake.mag = 0;
     projectiles.length = 0; effects.length = 0; enemies.length = 0; gems.length = 0; heals.length = 0; chests.length = 0; popups.length = 0;
+    hazards.length = 0;
     resultTime.textContent = fmtTime(timeAlive);
     resultWave.textContent = `${stage}-${waveInStage}`;
     resultKills.textContent = String(kills);
@@ -841,16 +856,48 @@
       };
       enemies.push(e);
     } else {
-      const e = {
-        type: 'melee',
-        x, y,
-        r: 12,
-        speed: randRange(60, 100) * waveScale,
-        hp: 20 * waveScale,
-        touchDps: 6 * waveScale,
-        hitTime: 0,
-      };
-      enemies.push(e);
+      // decide between melee / charger / splitter
+      const t = timeAlive;
+      const pCharger = Math.min(0.12, 0.03 + t * 0.0008);
+      const pSplitter = Math.min(0.10, 0.02 + t * 0.0006);
+      const rpick = Math.random();
+      if (rpick < pCharger) {
+        const e = {
+          type: 'charger', x, y,
+          r: 12,
+          speed: randRange(60, 90) * waveScale,
+          baseSpeed: randRange(60, 90) * waveScale,
+          hp: 22 * waveScale,
+          touchDps: 10 * waveScale,
+          hitTime: 0,
+          cdT: randRange(2.0, 3.5),
+          warnT: 0,
+          chargeT: 0,
+        };
+        enemies.push(e);
+      } else if (rpick < pCharger + pSplitter) {
+        const e = {
+          type: 'splitter', x, y,
+          r: 12,
+          speed: randRange(55, 85) * waveScale,
+          hp: 18 * waveScale,
+          touchDps: 6 * waveScale,
+          hitTime: 0,
+          child: false,
+        };
+        enemies.push(e);
+      } else {
+        const e = {
+          type: 'melee',
+          x, y,
+          r: 12,
+          speed: randRange(60, 100) * waveScale,
+          hp: 20 * waveScale,
+          touchDps: 6 * waveScale,
+          hitTime: 0,
+        };
+        enemies.push(e);
+      }
     }
   }
 
@@ -901,6 +948,12 @@
         if (e.hp <= 0) {
           enemies.splice(i, 1);
           kills++;
+          // splitter split
+          if (e.type === 'splitter' && !e.child) {
+            for (let s = 0; s < 2; s++) {
+              enemies.push({ type:'splitling', x: e.x + (Math.random()*10-5), y: e.y + (Math.random()*10-5), r: 9, speed: e.speed*1.2, hp: 10, touchDps: 4, hitTime: 0, child: true });
+            }
+          }
           // drop gem
           gems.push({ x: e.x, y: e.y, r: 5, value: 8 });
           if (Math.random() < 0.08) heals.push({ x: e.x, y: e.y, r: 6 });
@@ -1040,6 +1093,27 @@
           const spd = 220 + Math.min(80, timeAlive * 2);
           projectiles.push({ x: e.x, y: e.y, vx: nx * spd, vy: ny * spd, r: 4, dmg: 10, t: 3.0 });
         }
+      } else if (e.type === 'charger') {
+        // charger: warn -> charge -> cooldown
+        if (e.warnT > 0) {
+          e.warnT -= dt;
+          // slight backstep while warning
+          e.x -= nx * e.baseSpeed * 0.3 * dt;
+          e.y -= ny * e.baseSpeed * 0.3 * dt;
+        } else if (e.chargeT > 0) {
+          e.chargeT -= dt;
+          const cs = e.baseSpeed * 3.0;
+          e.x += nx * cs * dt;
+          e.y += ny * cs * dt;
+        } else {
+          e.cdT -= dt;
+          // normal chase
+          e.x += nx * e.baseSpeed * dt * slowMul;
+          e.y += ny * e.baseSpeed * dt * slowMul;
+          if (e.cdT <= 0 && d < 300) {
+            e.warnT = 0.6; e.chargeT = 0.35; e.cdT = 3.0 + Math.random()*1.5;
+          }
+        }
       } else {
         e.x += nx * e.speed * dt * slowMul;
         e.y += ny * e.speed * dt * slowMul;
@@ -1072,7 +1146,6 @@
             e.hitTime = 0.1;
             effects.push({ kind:'hitspark', x: e.x, y: e.y, t: 0.1, max: 0.1 });
             popups.push({ x: e.x, y: e.y-10, v: -30, t: 0.6, txt: Math.round(p.dmg)+'', col: '#ffdca8' });
-            if (e.hp <= 0) { enemies.splice(j,1); kills++; gems.push({x:e.x,y:e.y,r:5,value:8}); if (Math.random()<0.08) heals.push({x:e.x,y:e.y,r:6}); const upgMeta3 = getUpgrades(); if (Math.random()<0.25*(1+((upgMeta3.gold||0)*0.10))) gold += 1; }
             projectiles.splice(i,1);
             break;
           }
