@@ -477,35 +477,35 @@
   // Upgrades
   const UPGRADES = [
     {
-      id: 'pwr1', name: '??+30%', desc: '湲곕낯 怨듦꺽??30% 利앷?',
+      id: 'pwr1', name: 'Power +30%', desc: 'Increase base power 30%', weight: 1.0, maxStacks: 6,
       apply: () => player.power *= 1.3
     },
     {
-      id: 'spd1', name: '?대룞 ?띾룄 +10%', desc: '?대룞 ?띾룄 10% 利앷?',
+      id: 'spd1', name: 'Move Speed +10%', desc: 'Increase move speed 10%', weight: 0.9, maxStacks: 5,
       apply: () => player.speed *= 1.10
     },
     {
-      id: 'hp1', name: '泥대젰 +20', desc: '理쒕? 泥대젰 +20, 利됱떆 ?뚮났',
+      id: 'hp1', name: 'Max HP +20', desc: 'Max HP +20, instantly heal', weight: 1.0, maxStacks: 8,
       apply: () => { player.maxHp += 20; player.hp = Math.min(player.maxHp, player.hp + 20); }
     },
     {
-      id: 'cd1', name: '荑⑦???-15%', desc: '?щ옒??荑⑦???15% 媛먯냼',
+      id: 'cd1', name: 'Cooldown -15%', desc: 'Slash cooldown -15%', weight: 0.7, maxStacks: 3,
       apply: () => player.slashCooldown = Math.max(0.15, player.slashCooldown * 0.85)
     },
     {
-      id: 'rng1', name: '以띻린 踰붿쐞 +30%', desc: '寃쏀뿕移?蹂댁꽍 ?≪닔 踰붿쐞 利앷?',
+      id: 'rng1', name: 'Pickup Range +30%', desc: 'Increase XP pickup range', weight: 0.8, maxStacks: 4,
       apply: () => player.pickupRange *= 1.30
     },
     {
-      id: 'sr1', name: '?щ옒??踰붿쐞 +20%', desc: '?щ옒??諛섍꼍 20% 利앷? (?곹븳 ?곸슜)',
+      id: 'sr1', name: 'Slash Radius +20%', desc: 'Increase slash radius (capped)', weight: 0.6, maxStacks: 3,
       apply: () => { player.slashRange = Math.min(player.slashRange * 1.20, player.slashRangeMax); }
     },
     {
-      id: 'sd1', name: '?щ옒???쇳빐 +40%', desc: '?щ옒???쇳빐 40% 利앷?',
+      id: 'sd1', name: 'Slash Damage +40%', desc: 'Increase slash damage 40%', weight: 0.9, maxStacks: 5,
       apply: () => player.power *= 1.40
     },
     {
-      id: 'crit1', name: '移섎챸? +5%', desc: '移섎챸? ?뺣쪧 +5%',
+      id: 'crit1', name: 'Crit Chance +5%', desc: 'Increase crit chance +5%', weight: 0.8, maxStacks: 6,
       apply: () => player.crit = Math.min(0.75, player.crit + 0.05)
     }
   ];
@@ -553,7 +553,7 @@
   btnUpgBack?.addEventListener('click', () => { elUpg.classList.add('hidden'); elMenu.classList.add('visible'); refreshWallet(); });
   upgCards.forEach(card => card.addEventListener('click', () => purchaseUpgrade(card.dataset.upg)));
   btnSettings?.addEventListener('click', () => gotoSettings());
-  btnSettingsBack?.addEventListener('click', () => { elSettings.classList.add('hidden');\n    if (typeof waveBar !== 'undefined' && waveBar) waveBar.classList.add('hidden'); elMenu.classList.add('visible'); });
+  btnSettingsBack?.addEventListener('click', () => { elSettings.classList.add('hidden'); if (typeof waveBar !== 'undefined' && waveBar) waveBar.classList.add('hidden'); elMenu.classList.add('visible'); });
   volMaster?.addEventListener('input', () => setVolumeFromUI());
   muteToggle?.addEventListener('change', () => setMuteFromUI());
   btnResume?.addEventListener('click', () => resumeGame());
@@ -591,8 +591,7 @@
     elChar.classList.add('hidden');
     elPause.classList.add('hidden');
     elUpg.classList.add('hidden');
-    elSettings.classList.add('hidden');\n    if (typeof waveBar !== 'undefined' && waveBar) waveBar.classList.add('hidden');
-    menuSelIdx = 0; updateMenuSelection();
+    elSettings.classList.add('hidden'); if (typeof waveBar !== 'undefined' && waveBar) waveBar.classList.add('hidden'); menuSelIdx = 0; updateMenuSelection();
   }
 
   function gotoChar() {
@@ -746,7 +745,7 @@
   }
   function settingsActivate() {
     if (settingsSelIdx === 1) { muteToggle.checked = !muteToggle.checked; setMuteFromUI(); }
-    else if (settingsSelIdx === 2) { elSettings.classList.add('hidden');\n    if (typeof waveBar !== 'undefined' && waveBar) waveBar.classList.add('hidden'); elMenu.classList.add('visible'); menuSelIdx = 0; updateMenuSelection(); }
+    else if (settingsSelIdx === 2) { elSettings.classList.add('hidden'); if (typeof waveBar !== 'undefined' && waveBar) waveBar.classList.add('hidden'); elMenu.classList.add('visible'); menuSelIdx = 0; updateMenuSelection(); }
   }
 
   function gameOver() {
@@ -1480,5 +1479,8 @@
   // Start at menu
   gotoMenu();
 })();
+
+
+
 
 
