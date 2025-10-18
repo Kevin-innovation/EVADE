@@ -1153,27 +1153,16 @@
     timeLabel.textContent = fmtTime(timeAlive);
     killLabel.textContent = String(kills);
     goldLabel.textContent = String(gold);
-    waveLabel.textContent = ${stage}-;
+    waveLabel.textContent = `${stage}-${waveInStage}`;
 
     // Wave progress bar
     if (waveBar) {
       const waveDuration = 30;
       const tIn = timeAlive - Math.floor(timeAlive / waveDuration) * waveDuration;
       const ratio = Math.max(0, Math.min(1, tIn / waveDuration));
-      if (waveFill) waveFill.style.width = (ratio*100).toString() + %;
-      if (waveText) waveText.textContent = (스테이지  + stage +  • 웨이브  + waveInStage);
-      if (waveEta) waveEta.textContent = (+ + (waveDuration - tIn).toFixed(1) + s);
-    }
-
-
-    // Wave progress bar
-    if (waveBar) {
-      const waveDuration = 30;
-      const tIn = timeAlive - Math.floor(timeAlive / waveDuration) * waveDuration;
-      const ratio = Math.max(0, Math.min(1, tIn / waveDuration));
-      if (waveFill) waveFill.style.width = (ratio*100).toString() + "%";
-      if (waveText) waveText.textContent = ("Stage " + stage + " • Wave " + waveInStage);
-      if (waveEta) waveEta.textContent = ("+" + (waveDuration - tIn).toFixed(1) + "s");
+      if (waveFill) waveFill.style.width = `${(ratio*100).toFixed(1)}%`;
+      if (waveText) waveText.textContent = `\uC2A4\uD14C\uC774\uC9C0 ${stage} • \uC6E8\uC774\uBE0C ${waveInStage}`;
+      if (waveEta) waveEta.textContent = `+${(waveDuration - tIn).toFixed(1)}s`;
     }
     // Skill cooldown UI
     for (const k of ['Q','W','E','R']) {
