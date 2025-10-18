@@ -1,4 +1,4 @@
-// EVADE - Minimal MVP per rules.md
+﻿// EVADE - Minimal MVP per rules.md
 (() => {
   'use strict';
 
@@ -20,6 +20,10 @@
   const killLabel = document.getElementById('kill-count');
   const goldLabel = document.getElementById('gold-count');
   const waveLabel = document.getElementById('wave-label');
+  const waveBar = document.getElementById('wavebar');
+  const waveFill = document.getElementById('wave-fill');
+  const waveText = document.getElementById('wave-text');
+  const waveEta = document.getElementById('wave-eta');
   const bossBar = document.getElementById('bossbar');
   const bossName = document.getElementById('boss-name');
   const bossFill = document.getElementById('boss-fill');
@@ -190,6 +194,7 @@
   let kills = 0;
   let gold = 0;
   let stage = 1, waveInStage = 1; // display only
+  let lastWaveIdx = -1;
 
   const player = {
     x: canvas.width * 0.5,
@@ -472,35 +477,35 @@
   // Upgrades
   const UPGRADES = [
     {
-      id: 'pwr1', name: '힘 +30%', desc: '기본 공격력 30% 증가',
+      id: 'pwr1', name: '??+30%', desc: '湲곕낯 怨듦꺽??30% 利앷?',
       apply: () => player.power *= 1.3
     },
     {
-      id: 'spd1', name: '이동 속도 +10%', desc: '이동 속도 10% 증가',
+      id: 'spd1', name: '?대룞 ?띾룄 +10%', desc: '?대룞 ?띾룄 10% 利앷?',
       apply: () => player.speed *= 1.10
     },
     {
-      id: 'hp1', name: '체력 +20', desc: '최대 체력 +20, 즉시 회복',
+      id: 'hp1', name: '泥대젰 +20', desc: '理쒕? 泥대젰 +20, 利됱떆 ?뚮났',
       apply: () => { player.maxHp += 20; player.hp = Math.min(player.maxHp, player.hp + 20); }
     },
     {
-      id: 'cd1', name: '쿨타임 -15%', desc: '슬래시 쿨타임 15% 감소',
+      id: 'cd1', name: '荑⑦???-15%', desc: '?щ옒??荑⑦???15% 媛먯냼',
       apply: () => player.slashCooldown = Math.max(0.15, player.slashCooldown * 0.85)
     },
     {
-      id: 'rng1', name: '줍기 범위 +30%', desc: '경험치 보석 흡수 범위 증가',
+      id: 'rng1', name: '以띻린 踰붿쐞 +30%', desc: '寃쏀뿕移?蹂댁꽍 ?≪닔 踰붿쐞 利앷?',
       apply: () => player.pickupRange *= 1.30
     },
     {
-      id: 'sr1', name: '슬래시 범위 +20%', desc: '슬래시 반경 20% 증가 (상한 적용)',
+      id: 'sr1', name: '?щ옒??踰붿쐞 +20%', desc: '?щ옒??諛섍꼍 20% 利앷? (?곹븳 ?곸슜)',
       apply: () => { player.slashRange = Math.min(player.slashRange * 1.20, player.slashRangeMax); }
     },
     {
-      id: 'sd1', name: '슬래시 피해 +40%', desc: '슬래시 피해 40% 증가',
+      id: 'sd1', name: '?щ옒???쇳빐 +40%', desc: '?щ옒???쇳빐 40% 利앷?',
       apply: () => player.power *= 1.40
     },
     {
-      id: 'crit1', name: '치명타 +5%', desc: '치명타 확률 +5%',
+      id: 'crit1', name: '移섎챸? +5%', desc: '移섎챸? ?뺣쪧 +5%',
       apply: () => player.crit = Math.min(0.75, player.crit + 0.05)
     }
   ];
@@ -548,7 +553,7 @@
   btnUpgBack?.addEventListener('click', () => { elUpg.classList.add('hidden'); elMenu.classList.add('visible'); refreshWallet(); });
   upgCards.forEach(card => card.addEventListener('click', () => purchaseUpgrade(card.dataset.upg)));
   btnSettings?.addEventListener('click', () => gotoSettings());
-  btnSettingsBack?.addEventListener('click', () => { elSettings.classList.add('hidden'); elMenu.classList.add('visible'); });
+  btnSettingsBack?.addEventListener('click', () => { elSettings.classList.add('hidden');\n    if (typeof waveBar !== 'undefined' && waveBar) waveBar.classList.add('hidden'); elMenu.classList.add('visible'); });
   volMaster?.addEventListener('input', () => setVolumeFromUI());
   muteToggle?.addEventListener('change', () => setMuteFromUI());
   btnResume?.addEventListener('click', () => resumeGame());
@@ -586,7 +591,7 @@
     elChar.classList.add('hidden');
     elPause.classList.add('hidden');
     elUpg.classList.add('hidden');
-    elSettings.classList.add('hidden');
+    elSettings.classList.add('hidden');\n    if (typeof waveBar !== 'undefined' && waveBar) waveBar.classList.add('hidden');
     menuSelIdx = 0; updateMenuSelection();
   }
 
@@ -641,6 +646,7 @@
     spawn.timer = 0; spawn.rate = 1.0; spawn.accel = 0.0; // reset spawn pacing
     nextEliteAt = 120; nextBossAt = 300; // reset special waves
     shake.t = 0; shake.max = 0; shake.mag = 0;
+    lastWaveIdx = -1;
     for (const k of Object.keys(skills)) skills[k].t = 0;
 
     elMenu.classList.remove('visible');
@@ -740,7 +746,7 @@
   }
   function settingsActivate() {
     if (settingsSelIdx === 1) { muteToggle.checked = !muteToggle.checked; setMuteFromUI(); }
-    else if (settingsSelIdx === 2) { elSettings.classList.add('hidden'); elMenu.classList.add('visible'); menuSelIdx = 0; updateMenuSelection(); }
+    else if (settingsSelIdx === 2) { elSettings.classList.add('hidden');\n    if (typeof waveBar !== 'undefined' && waveBar) waveBar.classList.add('hidden'); elMenu.classList.add('visible'); menuSelIdx = 0; updateMenuSelection(); }
   }
 
   function gameOver() {
@@ -858,7 +864,7 @@
     else { x = randRange(0, canvas.width); y = canvas.height + margin; }
     const waveScale = 1 + Math.min(3.0, timeAlive / 90);
     enemies.push({ type:'elite', x, y, r: 16, speed: 90*waveScale, hp: 200*waveScale, touchDps: 12*waveScale, hitTime: 0, aura: 1 });
-    effects.push({ kind:'banner', t:1.6, max:1.6, text:'엘리트 등장!' });
+    effects.push({ kind:'banner', t:1.6, max:1.6, text:'?섎━???깆옣!' });
     sfx('elite');
   }
 
@@ -868,7 +874,7 @@
     const waveScale = 1 + Math.min(4.0, timeAlive / 60);
     const hp = 2000*waveScale;
     enemies.push({ type:'boss', name:'Void Titan', x, y, r: 28, speed: 70*waveScale, hp, maxHp: hp, touchDps: 25*waveScale, hitTime: 0, fireT: 1.5, fireCd: 2.5, fireMode: 'ring' });
-    effects.push({ kind:'banner', t:2.0, max:2.0, text:'보스 등장!' });
+    effects.push({ kind:'banner', t:2.0, max:2.0, text:'蹂댁뒪 ?깆옣!' });
     sfx('boss');
   }
 
@@ -936,7 +942,12 @@
     player.dmgReduce = shield ? 0.5 : 0;
 
     // wave tracking
-    const { stageNum, waveInStageNum } = currentWaveFromTime(timeAlive);
+    const { stageNum, waveInStageNum, waveIndex } = currentWaveFromTime(timeAlive);
+    if (waveIndex !== lastWaveIdx) {
+      lastWaveIdx = waveIndex;
+      effects.push({ kind:'banner', t: 1.8, max: 1.8, text: `STAGE ${stageNum} ??WAVE ${waveInStageNum}` });
+      sfx('wave');
+    }
     stage = stageNum; waveInStage = waveInStageNum;
 
     // movement
@@ -1143,6 +1154,16 @@
     goldLabel.textContent = String(gold);
     waveLabel.textContent = `${stage}-${waveInStage}`;
 
+
+    // Wave progress bar
+    if (waveBar) {
+      const waveDuration = 30;
+      const tIn = timeAlive - Math.floor(timeAlive / waveDuration) * waveDuration;
+      const ratio = Math.max(0, Math.min(1, tIn / waveDuration));
+      if (waveFill) waveFill.style.width = (ratio*100).toString() + "%";
+      if (waveText) waveText.textContent = ("Stage " + stage + " • Wave " + waveInStage);
+      if (waveEta) waveEta.textContent = ("+" + (waveDuration - tIn).toFixed(1) + "s");
+    }
     // Skill cooldown UI
     for (const k of ['Q','W','E','R']) {
       const s = skills[k]; const el = skillEls[k]; if (!s || !el) continue;
@@ -1347,11 +1368,12 @@
       } else if (ef.kind === 'banner') {
         const p = 1 - (ef.t / ef.max);
         ctx.save();
-        ctx.globalAlpha = 0.9 * (ef.t / ef.max);
+        ctx.globalAlpha = 0.95 * (ef.t / ef.max);
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 28px Segoe UI, system-ui';
+        ctx.font = 'bold 44px Segoe UI, system-ui';
         ctx.textAlign = 'center';
-        ctx.fillText(ef.text || '', canvas.width/2, 60 + 10*p);
+        const y = canvas.height/2 - 20 * (1 - p);
+        ctx.fillText(ef.text || '', canvas.width/2, y);
         ctx.restore();
       } else if (ef.kind === 'hurt') {
         const p = ef.t / ef.max;
@@ -1433,6 +1455,7 @@
       case 'level': beep(880, 0.12, 0.04, 'sine'); beep(1320, 0.12, 0.03, 'sine'); break;
       case 'elite': beep(500, 0.10, 0.035, 'sawtooth'); break;
       case 'boss': beep(200, 0.20, 0.05, 'square'); break;
+      case 'wave': beep(520, 0.10, 0.035, 'sine'); beep(780, 0.10, 0.03, 'sine'); break;
       case 'chest': beep(600, 0.08, 0.03, 'sine'); beep(900, 0.08, 0.02, 'sine'); break;
       default: break;
     }
@@ -1457,3 +1480,5 @@
   // Start at menu
   gotoMenu();
 })();
+
+
