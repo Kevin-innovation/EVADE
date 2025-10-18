@@ -363,6 +363,52 @@
     if (segments.length) effects.push({ kind: 'zap', t: 0.14, max: 0.14, segs: segments });
   }
 
+  // Additional skills for other characters
+  function multiShotSkill() {
+    const target = nearestEnemy();
+    if (!target) return;
+    const baseAng = Math.atan2(target.y - player.y, target.x - player.x);
+    const count = 3; const spread = Math.PI / 16; const spd = 420;
+    for (let i = 0; i < count; i++) {
+      const t = (i - (count-1)/2);
+      const ang = baseAng + t * spread;
+      projectiles.push({ x: player.x, y: player.y, vx: Math.cos(ang)*spd, vy: Math.sin(ang)*spd, r: 4, dmg: player.power * 1.6, t: 1.5, friendly: true });
+    }
+    effects.push({ kind: 'boltcast', t: 0.12, max: 0.12 });
+  }
+
+  function blinkStrikeSkill() {
+    const t = nearestEnemy(); if (!t) return;
+    const ang = Math.atan2(t.y - player.y, t.x - player.x);
+    const dist = 80;
+    player.x = clamp(t.x - Math.cos(ang)*dist, 0, canvas.width);
+    player.y = clamp(t.y - Math.sin(ang)*dist, 0, canvas.height);
+    player.invuln = Math.max(player.invuln, 0.15);
+    // heavy strike
+    let dmg = player.power * 4.0; if (Math.random() < player.crit) dmg *= 2;
+    t.hp -= dmg; t.hitTime = 0.15; effects.push({ kind:'hitspark', x:t.x, y:t.y, t:0.15, max:0.15 });
+  }
+
+  function healSkill() {
+    const heal = player.maxHp * 0.3; player.hp = Math.min(player.maxHp, player.hp + heal);
+    effects.push({ kind:'shield', t: 0.8, max: 0.8 });
+  }
+
+  let slowFieldT = 0;
+  function slowFieldSkill() {
+    slowFieldT = Math.max(slowFieldT, 3.0);
+    effects.push({ kind:'slow', t: 0.6, max: 0.6 });
+  }
+
+  function bombBurstSkill() {
+    const bullets = 8; const spd = 300;
+    for (let k=0;k<bullets;k++){
+      const ang = (Math.PI*2*k)/bullets;
+      projectiles.push({ x: player.x, y: player.y, vx: Math.cos(ang)*spd, vy: Math.sin(ang)*spd, r: 5, dmg: player.power * 1.8, t: 2.5, friendly: true });
+    }
+    effects.push({ kind:'quake', t: 0.25, max: 0.25 });
+  }
+
   function applySkillsForCharacter(name) {
     if (name === 'Lumina') {
       skills = {
@@ -371,12 +417,54 @@
         E: { cd: 8.0, t: 0, cast: () => novaSkill() },
         R: { cd: 16.0, t: 0, cast: () => quakeSkill() },
       };
-    } else { // Aegis
+    } else if (name === 'Aegis') { // Aegis tanky
       skills = {
         Q: { cd: 6.0, t: 0, cast: () => dashSkill() },
         W: { cd: 10.0, t: 0, cast: () => shieldSkill() },
         E: { cd: 8.0, t: 0, cast: () => novaSkill() },
         R: { cd: 20.0, t: 0, cast: () => quakeSkill() },
+      };
+    } else if (name === 'Sylva') { // archer
+      skills = {
+        Q: { cd: 3.0, t: 0, cast: () => multiShotSkill() },
+        W: { cd: 6.0, t: 0, cast: () => multiShotSkill() },
+        E: { cd: 8.0, t: 0, cast: () => novaSkill() },
+        R: { cd: 16.0, t: 0, cast: () => bombBurstSkill() },
+      };
+    } else if (name === 'Zed') { // assassin
+      skills = {
+        Q: { cd: 4.5, t: 0, cast: () => dashSkill() },
+        W: { cd: 7.0, t: 0, cast: () => blinkStrikeSkill() },
+        E: { cd: 8.0, t: 0, cast: () => novaSkill() },
+        R: { cd: 18.0, t: 0, cast: () => blinkStrikeSkill() },
+      };
+    } else if (name === 'Gaia') { // earth guardian
+      skills = {
+        Q: { cd: 6.0, t: 0, cast: () => shieldSkill() },
+        W: { cd: 8.0, t: 0, cast: () => quakeSkill() },
+        E: { cd: 10.0, t: 0, cast: () => novaSkill() },
+        R: { cd: 18.0, t: 0, cast: () => quakeSkill() },
+      };
+    } else if (name === 'Seraph') { // healer
+      skills = {
+        Q: { cd: 8.0, t: 0, cast: () => healSkill() },
+        W: { cd: 10.0, t: 0, cast: () => shieldSkill() },
+        E: { cd: 10.0, t: 0, cast: () => novaSkill() },
+        R: { cd: 18.0, t: 0, cast: () => healSkill() },
+      };
+    } else if (name === 'Chrono') { // time control
+      skills = {
+        Q: { cd: 8.0, t: 0, cast: () => slowFieldSkill() },
+        W: { cd: 12.0, t: 0, cast: () => boltSkill() },
+        E: { cd: 10.0, t: 0, cast: () => novaSkill() },
+        R: { cd: 18.0, t: 0, cast: () => slowFieldSkill() },
+      };
+    } else if (name === 'Mad-doc') { // alchemist
+      skills = {
+        Q: { cd: 6.0, t: 0, cast: () => bombBurstSkill() },
+        W: { cd: 8.0, t: 0, cast: () => boltSkill() },
+        E: { cd: 10.0, t: 0, cast: () => novaSkill() },
+        R: { cd: 16.0, t: 0, cast: () => bombBurstSkill() },
       };
     }
   }
@@ -419,6 +507,35 @@
   let pendingChoices = [];
   let levelSelIdx = 0;
   let menuSelIdx = 0, charSelIdx = 0, upgSelIdx = 0, pauseSelIdx = 0, overSelIdx = 0, settingsSelIdx = 0;
+  const upgradeCounts = {};
+  const UPG_WEIGHT = { pwr1:1.0, spd1:0.9, hp1:1.0, cd1:0.7, rng1:0.8, sr1:0.6, sd1:0.9, crit1:0.8 };
+  const UPG_MAX = { pwr1:6, spd1:5, hp1:8, cd1:3, rng1:4, sr1:3, sd1:5, crit1:6 };
+
+  function canTakeUpgrade(upg) {
+    const max = UPG_MAX[upg.id];
+    const cnt = upgradeCounts[upg.id] || 0;
+    return max == null || cnt < max;
+  }
+
+  function weightedChoices(arr, count) {
+    const picks = [];
+    const pool = arr.slice();
+    for (let i = 0; i < count && pool.length > 0; i++) {
+      let total = 0;
+      const weights = pool.map(upg => {
+        const cnt = upgradeCounts[upg.id] || 0;
+        const base = UPG_WEIGHT[upg.id] || 1;
+        const w = base / (1 + cnt);
+        total += w; return w;
+      });
+      let r = Math.random() * total;
+      let idx = 0;
+      for (; idx < pool.length; idx++) { if ((r -= weights[idx]) <= 0) break; }
+      picks.push(pool[idx]);
+      pool.splice(idx, 1);
+    }
+    return picks;
+  }
 
   // Buttons
   btnStart?.addEventListener('click', () => gotoChar());
@@ -448,6 +565,7 @@
       levelSelIdx = idx;
       const choice = pendingChoices[idx];
       if (!choice) return;
+      upgradeCounts[choice.id] = (upgradeCounts[choice.id] || 0) + 1;
       choice.apply();
       hideLevelUp();
     });
@@ -512,6 +630,7 @@
   function startGame() {
     // Reset
     enemies.length = 0; gems.length = 0; effects.length = 0; projectiles.length = 0; heals.length = 0; chests.length = 0; popups.length = 0;
+    for (const k in upgradeCounts) delete upgradeCounts[k];
     player.x = canvas.width * 0.5; player.y = canvas.height * 0.5;
     player.cdr = 0; player.pickupRange = 120; player.slashRange = 70; player.slashRangeMax = 160; player.slashCooldown = 0.45; player.slashReadyIn = 0;
     applyCharacterPreset(selectedCharacter);
@@ -548,8 +667,9 @@
 
   function showLevelUp() {
     state = 'LEVELUP';
-    // pick 3 unique upgrades
-    pendingChoices = pickN(UPGRADES, 3);
+    // pick weighted, non-duplicate upgrades with caps
+    const avail = UPGRADES.filter(canTakeUpgrade);
+    pendingChoices = weightedChoices(avail, 3);
     levelupButtons.forEach((btn, i) => {
       const ch = pendingChoices[i];
       if (ch) btn.innerHTML = `<div class="title">${ch.name}</div><div class="desc">${ch.desc}</div>`;
@@ -572,6 +692,7 @@
   function chooseLevelIndex(i) {
     const choice = pendingChoices[i];
     if (!choice) return;
+    upgradeCounts[choice.id] = (upgradeCounts[choice.id] || 0) + 1;
     choice.apply();
     hideLevelUp();
   }
@@ -804,6 +925,8 @@
     if (state !== 'RUNNING') return;
 
     timeAlive += dt;
+    // global slow field timer
+    slowFieldT = Math.max(0, slowFieldT - dt);
     player.slashReadyIn = Math.max(0, player.slashReadyIn - dt);
     player.invuln = Math.max(0, player.invuln - dt);
     if (shake.t > 0) shake.t = Math.max(0, shake.t - dt);
@@ -850,10 +973,11 @@
       const dx = player.x - e.x, dy = player.y - e.y;
       const d = Math.hypot(dx, dy) || 1;
       const nx = dx / d, ny = dy / d;
+      const slowMul = slowFieldT > 0 ? 0.6 : 1;
       if (e.type === 'boss') {
         // move
-        e.x += nx * e.speed * dt;
-        e.y += ny * e.speed * dt;
+        e.x += nx * e.speed * dt * slowMul;
+        e.y += ny * e.speed * dt * slowMul;
 
         // phase scaling by HP
         const ratio = (e.maxHp ? e.hp / e.maxHp : 1);
@@ -889,8 +1013,8 @@
         }
       } else if (e.type === 'elite') {
         // tougher melee that occasionally dashes
-        e.x += nx * e.speed * dt;
-        e.y += ny * e.speed * dt;
+        e.x += nx * e.speed * dt * slowMul;
+        e.y += ny * e.speed * dt * slowMul;
         // small aura effect (visual only); damage handled on touch
       } else if (e.type === 'archer') {
         // keep distance; move towards if too far, away if too close
@@ -905,8 +1029,8 @@
           projectiles.push({ x: e.x, y: e.y, vx: nx * spd, vy: ny * spd, r: 4, dmg: 10, t: 3.0 });
         }
       } else {
-        e.x += nx * e.speed * dt;
-        e.y += ny * e.speed * dt;
+        e.x += nx * e.speed * dt * slowMul;
+        e.y += ny * e.speed * dt * slowMul;
       }
       e.hitTime = Math.max(0, e.hitTime - dt);
 
@@ -1235,6 +1359,15 @@
         ctx.globalAlpha = 0.25 * p;
         ctx.fillStyle = '#ff2a43';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.restore();
+      } else if (ef.kind === 'slow') {
+        const p = ef.t / ef.max;
+        ctx.save();
+        ctx.globalAlpha = 0.12 * p;
+        ctx.fillStyle = '#88ccff';
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, 220, 0, Math.PI*2);
+        ctx.fill();
         ctx.restore();
       }
     }
