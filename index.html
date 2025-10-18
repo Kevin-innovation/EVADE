@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVADE</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="main-menu" class="screen visible">
+        <h1 class="title">EVADE</h1>
+        <div class="menu-buttons">
+            <button id="btn-start">게임 시작</button>
+            <button id="btn-upgrades">연구 강화</button>
+            <button id="btn-characters">캐릭터 선택</button>
+            <button id="btn-settings">설정</button>
+        </div>
+        <p class="hint">이동: 화살표, 공격: Space, 스킬: QWER</p>
+    </div>
+
+    <div id="char-select" class="screen hidden">
+        <h2 class="title" style="font-size:28px">캐릭터 선택</h2>
+        <div class="char-grid">
+            <button class="char-card" data-char="Aegis">
+                <img class="char-img" src="img/1.png" alt="Aegis">
+                <div>
+                  <div class="char-name">아이기스 (Aegis)</div>
+                  <div class="char-desc">근접 탱커. 방어/광역 제어.</div>
+                  <div class="char-stats">HP 높음, 방어 높음, 이속 보통</div>
+                </div>
+            </button>
+            <button class="char-card" data-char="Lumina">
+                <img class="char-img" src="img/2.png" alt="Lumina">
+                <div>
+                  <div class="char-name">루미나 (Lumina)</div>
+                  <div class="char-desc">원거리 광역 마법사.</div>
+                  <div class="char-stats">공격력 높음, 이속 보통</div>
+                </div>
+            </button>
+            <button class="char-card" data-char="Sylva">
+                <img class="char-img" src="img/3.png" alt="Sylva">
+                <div>
+                  <div class="char-name">실바 (Sylva)</div>
+                  <div class="char-desc">그림자 궁수. 관통 화살/지속딜.</div>
+                  <div class="char-stats">원거리, 이속 보통</div>
+                </div>
+            </button>
+            <button class="char-card" data-char="Pyra">
+                <img class="char-img" src="img/4.png" alt="Pyra">
+                <div>
+                  <div class="char-name">피라 (Pyra)</div>
+                  <div class="char-desc">화염술사. 점화/광역 연소.</div>
+                  <div class="char-stats">마법 공격, 제어</div>
+                </div>
+            </button>
+            <button class="char-card" data-char="Umbra">
+                <img class="char-img" src="img/5.png" alt="Umbra">
+                <div>
+                  <div class="char-name">움브라 (Umbra)</div>
+                  <div class="char-desc">암살자. 순간이동/백어택.</div>
+                  <div class="char-stats">근접, 고기동</div>
+                </div>
+            </button>
+            <button class="char-card" data-char="Terra">
+                <img class="char-img" src="img/6.png" alt="Terra">
+                <div>
+                  <div class="char-name">테라 (Terra)</div>
+                  <div class="char-desc">대지의 수호자. 방벽/충격파.</div>
+                  <div class="char-stats">탱커, 제어</div>
+                </div>
+            </button>
+            <button class="char-card" data-char="Zephyr">
+                <img class="char-img" src="img/7.png" alt="Zephyr">
+                <div>
+                  <div class="char-name">제피르 (Zephyr)</div>
+                  <div class="char-desc">바람 무희. 대시/회오리.</div>
+                  <div class="char-stats">고기동, 범위딜</div>
+                </div>
+            </button>
+            <button class="char-card" data-char="Noctis">
+                <img class="char-img" src="img/8.png" alt="Noctis">
+                <div>
+                  <div class="char-name">녹티스 (Noctis)</div>
+                  <div class="char-desc">어둠 마도사. 흡혈/디버프.</div>
+                  <div class="char-stats">마법, 생존</div>
+                </div>
+            </button>
+        </div>
+        <div class="menu-buttons">
+            <button id="btn-char-back">뒤로</button>
+            <button id="btn-char-play" disabled>선택하고 시작</button>
+        </div>
+    </div>
+
+    <div id="upgrades-menu" class="screen hidden">
+        <h2 class="title" style="font-size:28px">연구 강화</h2>
+        <div class="hint">메타 진행: 게임 종료 시 골드가 적립됩니다.</div>
+        <div class="menu-wallet">보유 골드: <span id="wallet-gold">0</span></div>
+        <div class="upgrade-grid">
+            <button class="upgrade-card" data-upg="hp">기본 체력 +10<br><small>비용: 20</small></button>
+            <button class="upgrade-card" data-upg="power">기본 공격력 +5%<br><small>비용: 30</small></button>
+            <button class="upgrade-card" data-upg="gold">골드 획득 +10%<br><small>비용: 25</small></button>
+            <button class="upgrade-card" data-upg="xp">경험치 획득 +5%<br><small>비용: 25</small></button>
+        </div>
+        <div class="menu-buttons">
+            <button id="btn-upg-back">뒤로</button>
+        </div>
+    </div>
+
+    <div id="settings-menu" class="screen hidden">
+        <h2 class="title" style="font-size:28px">설정</h2>
+        <div class="menu-wallet" style="margin-bottom:4px">오디오 설정</div>
+        <div style="display:grid;gap:10px;min-width:280px">
+            <label>마스터 볼륨: <input id="vol-master" type="range" min="0" max="100" value="70"> <span id="vol-label">70</span>%</label>
+            <label><input id="mute-toggle" type="checkbox"> 음소거 (단축키: M)</label>
+        </div>
+        <div class="menu-buttons" style="margin-top:10px">
+            <button id="btn-settings-back">뒤로</button>
+        </div>
+    </div>
+
+    <div id="hud" class="hud hidden">
+        <div class="hud-left">
+            <div class="hp-label">HP</div>
+            <div class="bar hp"><div class="fill" id="hp-fill"></div></div>
+            <div class="xp-row">
+                <span class="level" id="level-label">Lv 1</span>
+                <div class="bar xp"><div class="fill" id="xp-fill"></div></div>
+            </div>
+        </div>
+        <div class="hud-center">
+            <div class="time" id="time-label">00:00</div>
+            <div class="skills-row">
+                <div class="skill" id="skill-Q"><div class="mask"></div><div class="label">Q</div><div class="cd">0</div></div>
+                <div class="skill" id="skill-W"><div class="mask"></div><div class="label">W</div><div class="cd">0</div></div>
+                <div class="skill" id="skill-E"><div class="mask"></div><div class="label">E</div><div class="cd">0</div></div>
+                <div class="skill" id="skill-R"><div class="mask"></div><div class="label">R</div><div class="cd">0</div></div>
+            </div>
+        </div>
+        <div class="hud-right">
+            <div>처치: <span id="kill-count">0</span></div>
+            <div>골드: <span id="gold-count">0</span></div>
+            <div>Wave: <span id="wave-label">1-1</span></div>
+        </div>
+    </div>
+
+    <div id="bossbar" class="bossbar hidden">
+        <div class="boss-name" id="boss-name">Boss</div>
+        <div class="bar boss"><div class="fill" id="boss-fill"></div></div>
+    </div>
+
+    <div id="levelup-overlay" class="overlay hidden">
+        <div class="card-panel">
+            <h2>레벨 업!</h2>
+            <p>하나를 선택하세요</p>
+            <div class="cards">
+                <button class="card" data-slot="0"></button>
+                <button class="card" data-slot="1"></button>
+                <button class="card" data-slot="2"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="gameover-overlay" class="overlay hidden">
+        <div class="card-panel">
+            <h2>게임 오버</h2>
+            <div class="results">
+                <div>생존 시간: <span id="result-time">00:00</span></div>
+                <div>최종 Wave: <span id="result-wave">1-1</span></div>
+                <div>처치 수: <span id="result-kills">0</span></div>
+                <div>획득 골드: <span id="result-gold">0</span></div>
+            </div>
+            <div class="menu-buttons">
+                <button id="btn-retry">다시 하기</button>
+                <button id="btn-exit">메인 메뉴</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pause-overlay" class="overlay hidden">
+        <div class="card-panel">
+            <h2>일시 정지</h2>
+            <div class="menu-buttons">
+                <button id="btn-resume">계속하기 (ESC)</button>
+                <button id="btn-exit2">메인 메뉴</button>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="game"></canvas>
+
+    <script src="scripts.js" defer></script>
+</body>
+</html>
