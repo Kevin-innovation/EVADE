@@ -75,6 +75,12 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .card { text-align: left; white-space: normal; height: 120px; }
 .card .title { font-size: 16px; margin: 0; }
 .results { display: grid; gap: 6px; margin: 12px 0; color: var(--muted); }
+/* Level-up card selection */
+.overlay .card.selected { outline: 2px solid var(--accent); }
+/* Generic selected outlines for keyboard nav */
+button.selected { outline: 2px solid var(--accent); }
+.upgrade-card.selected { outline: 2px solid var(--accent); }
+input[type="range"].selected, input[type="checkbox"].selected { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Character select */
 .char-grid { display: grid; grid-template-columns: repeat(4, minmax(180px, 1fr)); gap: 12px; width: min(980px, 92vw); }

@@ -56,11 +56,11 @@
     Aegis: 'img/1.png',
     Lumina: 'img/2.png',
     Sylva: 'img/3.png',
-    Pyra: 'img/4.png',
-    Umbra: 'img/5.png',
-    Terra: 'img/6.png',
-    Zephyr: 'img/7.png',
-    Noctis: 'img/8.png',
+    Zed: 'img/4.png',
+    Gaia: 'img/5.png',
+    Seraph: 'img/6.png',
+    Chrono: 'img/7.png',
+    'Mad-doc': 'img/8.png',
   };
   const imageCache = {};
   function getCharImage(id) {
@@ -108,12 +108,13 @@
   // Input
   const keys = new Set();
   const K = {
-    LEFT: ['ArrowLeft', 'a', 'A'],
-    RIGHT: ['ArrowRight', 'd', 'D'],
-    UP: ['ArrowUp', 'w', 'W'],
-    DOWN: ['ArrowDown', 's', 'S'],
+    LEFT: ['ArrowLeft'],
+    RIGHT: ['ArrowRight'],
+    UP: ['ArrowUp'],
+    DOWN: ['ArrowDown'],
     SLASH: [' ', 'Spacebar'],
     Q: ['q', 'Q'], W: ['w', 'W'], E: ['e', 'E'], R: ['r', 'R'],
+    ENTER: ['Enter', 'NumpadEnter'],
     ESC: ['Escape'],
     MUTE: ['m', 'M'],
     DEBUG: ['F3']
@@ -132,10 +133,52 @@
     }
     if (state === 'PAUSED') {
       if (K.ESC.includes(e.key)) { resumeGame(); }
+      // pause menu selection
+      if (['ArrowUp','ArrowDown'].includes(e.key)) { pauseSelIdx = (pauseSelIdx + (e.key==='ArrowUp'?-1:1) + 2) % 2; updatePauseSelection(); }
+      if (K.ENTER.includes(e.key)) { activatePauseSelection(); }
     }
     if (state === 'LEVELUP') {
       // prevent scrolling space etc
-      if ([' ', 'Spacebar', 'ArrowUp', 'ArrowDown'].includes(e.key)) e.preventDefault();
+      if ([' ', 'Spacebar', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
+      if (['ArrowLeft', 'ArrowUp'].includes(e.key)) { levelSelIdx = (levelSelIdx + levelupButtons.length - 1) % levelupButtons.length; updateLevelSelection(); }
+      if (['ArrowRight', 'ArrowDown'].includes(e.key)) { levelSelIdx = (levelSelIdx + 1) % levelupButtons.length; updateLevelSelection(); }
+      if (K.ENTER.includes(e.key)) { chooseLevelIndex(levelSelIdx); }
+    }
+    // MENU and other screens navigation
+    if (state === 'MENU') {
+      if (elMenu.classList.contains('visible')) {
+        if (['ArrowUp','ArrowDown'].includes(e.key)) { const items = getMainMenuButtons(); if (items.length){ menuSelIdx = (menuSelIdx + (e.key==='ArrowUp'?-1:1) + items.length) % items.length; updateMenuSelection(); }}
+        if (K.ENTER.includes(e.key)) { activateMenuSelection(); }
+      }
+      if (!elChar.classList.contains('hidden')) {
+        const cols = 4; const n = charCards.length;
+        if (e.key==='ArrowLeft') charSelIdx = Math.max(0, charSelIdx - 1);
+        if (e.key==='ArrowRight') charSelIdx = Math.min(n-1, charSelIdx + 1);
+        if (e.key==='ArrowUp') charSelIdx = Math.max(0, charSelIdx - cols);
+        if (e.key==='ArrowDown') charSelIdx = Math.min(n-1, charSelIdx + cols);
+        updateCharSelection();
+        if (K.ENTER.includes(e.key)) { activateCharSelection(); }
+      }
+      if (!elUpg.classList.contains('hidden')) {
+        const cols = 2; const n = upgCards.length;
+        if (e.key==='ArrowLeft') upgSelIdx = Math.max(0, upgSelIdx - 1);
+        if (e.key==='ArrowRight') upgSelIdx = Math.min(n-1, upgSelIdx + 1);
+        if (e.key==='ArrowUp') upgSelIdx = Math.max(0, upgSelIdx - cols);
+        if (e.key==='ArrowDown') upgSelIdx = Math.min(n-1, upgSelIdx + cols);
+        updateUpgSelection();
+        if (K.ENTER.includes(e.key)) { activateUpgSelection(); }
+      }
+      if (!elSettings.classList.contains('hidden')) {
+        if (e.key==='ArrowUp') { settingsSelIdx = (settingsSelIdx + 3 - 1) % 3; updateSettingsSelection(); }
+        if (e.key==='ArrowDown') { settingsSelIdx = (settingsSelIdx + 1) % 3; updateSettingsSelection(); }
+        if (e.key==='ArrowLeft') { settingsLeftRight(-1); }
+        if (e.key==='ArrowRight') { settingsLeftRight(+1); }
+        if (K.ENTER.includes(e.key)) { settingsActivate(); }
+      }
+    }
+    if (state === 'GAMEOVER') {
+      if (['ArrowUp','ArrowDown'].includes(e.key)) { overSelIdx = (overSelIdx + (e.key==='ArrowUp'?-1:1) + 2) % 2; updateOverSelection(); }
+      if (K.ENTER.includes(e.key)) { activateOverSelection(); }
     }
   });
   window.addEventListener('keyup', (e) => keys.delete(e.key));
@@ -160,6 +203,7 @@
     cdr: 0.0,
     pickupRange: 120,
     slashRange: 70,
+    slashRangeMax: 160,
     slashCooldown: 0.45,
     slashReadyIn: 0,
     invuln: 0,
@@ -360,8 +404,8 @@
       apply: () => player.pickupRange *= 1.30
     },
     {
-      id: 'sr1', name: '슬래시 범위 +20%', desc: '슬래시 반경 20% 증가',
-      apply: () => player.slashRange *= 1.20
+      id: 'sr1', name: '슬래시 범위 +20%', desc: '슬래시 반경 20% 증가 (상한 적용)',
+      apply: () => { player.slashRange = Math.min(player.slashRange * 1.20, player.slashRangeMax); }
     },
     {
       id: 'sd1', name: '슬래시 피해 +40%', desc: '슬래시 피해 40% 증가',
@@ -373,6 +417,8 @@
     }
   ];
   let pendingChoices = [];
+  let levelSelIdx = 0;
+  let menuSelIdx = 0, charSelIdx = 0, upgSelIdx = 0, pauseSelIdx = 0, overSelIdx = 0, settingsSelIdx = 0;
 
   // Buttons
   btnStart?.addEventListener('click', () => gotoChar());
@@ -399,6 +445,7 @@
   });
   levelupButtons.forEach((btn, idx) => {
     btn.addEventListener('click', () => {
+      levelSelIdx = idx;
       const choice = pendingChoices[idx];
       if (!choice) return;
       choice.apply();
@@ -421,24 +468,29 @@
     elChar.classList.add('hidden');
     elPause.classList.add('hidden');
     elUpg.classList.add('hidden');
+    elSettings.classList.add('hidden');
+    menuSelIdx = 0; updateMenuSelection();
   }
 
   function gotoChar() {
     elMenu.classList.remove('visible');
     elChar.classList.remove('hidden');
     elChar.classList.add('visible');
+    if (charCards.length) { charSelIdx = 0; updateCharSelection(); }
   }
 
   function gotoUpgrades() {
     elMenu.classList.remove('visible');
     elUpg.classList.remove('hidden');
     refreshWallet();
+    upgSelIdx = 0; updateUpgSelection();
   }
 
   function gotoSettings() {
     elMenu.classList.remove('visible');
     elSettings.classList.remove('hidden');
     syncSettingsUI();
+    settingsSelIdx = 0; updateSettingsSelection();
   }
 
   let selectedCharacter = 'Aegis';
@@ -459,15 +511,17 @@
 
   function startGame() {
     // Reset
-    enemies.length = 0; gems.length = 0; effects.length = 0;
+    enemies.length = 0; gems.length = 0; effects.length = 0; projectiles.length = 0; heals.length = 0; chests.length = 0; popups.length = 0;
     player.x = canvas.width * 0.5; player.y = canvas.height * 0.5;
-    player.cdr = 0; player.pickupRange = 120; player.slashRange = 70; player.slashCooldown = 0.45; player.slashReadyIn = 0;
+    player.cdr = 0; player.pickupRange = 120; player.slashRange = 70; player.slashRangeMax = 160; player.slashCooldown = 0.45; player.slashReadyIn = 0;
     applyCharacterPreset(selectedCharacter);
     applySkillsForCharacter(selectedCharacter);
     player.dmgReduce = 0;
     timeAlive = 0; kills = 0; gold = 0; stage = 1; waveInStage = 1;
     levelState.level = 1; levelState.xp = 0; levelState.next = xpForLevel(1);
     spawn.timer = 0; spawn.rate = 1.0; spawn.accel = 0.0; // reset spawn pacing
+    nextEliteAt = 120; nextBossAt = 300; // reset special waves
+    shake.t = 0; shake.max = 0; shake.mag = 0;
     for (const k of Object.keys(skills)) skills[k].t = 0;
 
     elMenu.classList.remove('visible');
@@ -483,6 +537,7 @@
     if (state !== 'RUNNING') return;
     state = 'PAUSED';
     elPause.classList.remove('hidden');
+    pauseSelIdx = 0; updatePauseSelection();
   }
 
   function resumeGame() {
@@ -501,6 +556,8 @@
     });
     elLevelUp.classList.remove('hidden');
     sfx('level');
+    levelSelIdx = 0;
+    updateLevelSelection();
   }
 
   function hideLevelUp() {
@@ -508,14 +565,75 @@
     state = 'RUNNING';
   }
 
+  function updateLevelSelection() {
+    levelupButtons.forEach((btn, i) => btn.classList.toggle('selected', i === levelSelIdx));
+  }
+
+  function chooseLevelIndex(i) {
+    const choice = pendingChoices[i];
+    if (!choice) return;
+    choice.apply();
+    hideLevelUp();
+  }
+
+  // Menu selection helpers
+  function getMainMenuButtons() {
+    return [btnStart, btnUpg, btnChar, btnSettings].filter(b => b && !b.disabled);
+  }
+  function updateMenuSelection() {
+    const items = getMainMenuButtons();
+    items.forEach((b, i) => b.classList.toggle('selected', i === menuSelIdx));
+  }
+  function activateMenuSelection() {
+    const items = getMainMenuButtons(); const b = items[menuSelIdx]; if (b) b.click();
+  }
+
+  // Character select helpers
+  function updateCharSelection() {
+    charCards.forEach((c, i) => c.classList.toggle('selected', i === charSelIdx));
+    const card = charCards[charSelIdx]; if (card) { selectedCharacter = card.dataset.char; btnCharPlay.disabled = false; }
+  }
+  function activateCharSelection() { if (charCards[charSelIdx]) startGame(); }
+
+  // Upgrades menu helpers
+  function updateUpgSelection() { upgCards.forEach((c, i) => c.classList.toggle('selected', i === upgSelIdx)); }
+  function activateUpgSelection() { const card = upgCards[upgSelIdx]; if (card) purchaseUpgrade(card.dataset.upg); }
+
+  // Pause/GameOver helpers
+  function updatePauseSelection() {
+    const items = [btnResume, btnExit2].filter(Boolean);
+    items.forEach((b,i)=> b.classList.toggle('selected', i===pauseSelIdx));
+  }
+  function activatePauseSelection() { const items=[btnResume,btnExit2].filter(Boolean); const b=items[pauseSelIdx]; if (b) b.click(); }
+  function updateOverSelection() { const items=[btnRetry,btnExit].filter(Boolean); items.forEach((b,i)=> b.classList.toggle('selected', i===overSelIdx)); }
+  function activateOverSelection() { const items=[btnRetry,btnExit].filter(Boolean); const b=items[overSelIdx]; if (b) b.click(); }
+
+  // Settings helpers
+  function updateSettingsSelection() {
+    [volMaster, muteToggle, btnSettingsBack].forEach((el,i)=> { if (el) el.classList.toggle('selected', i===settingsSelIdx); });
+  }
+  function settingsLeftRight(dir) {
+    if (settingsSelIdx === 0) { // volume
+      const cur = parseInt(volMaster.value||'70',10); const next = Math.max(0, Math.min(100, cur + dir*5)); volMaster.value = String(next); setVolumeFromUI(); updateSettingsSelection();
+    }
+  }
+  function settingsActivate() {
+    if (settingsSelIdx === 1) { muteToggle.checked = !muteToggle.checked; setMuteFromUI(); }
+    else if (settingsSelIdx === 2) { elSettings.classList.add('hidden'); elMenu.classList.add('visible'); menuSelIdx = 0; updateMenuSelection(); }
+  }
+
   function gameOver() {
     state = 'GAMEOVER';
+    // stop any camera shake/effects and clear lingering entities
+    shake.t = 0; shake.max = 0; shake.mag = 0;
+    projectiles.length = 0; effects.length = 0; enemies.length = 0; gems.length = 0; heals.length = 0; chests.length = 0; popups.length = 0;
     resultTime.textContent = fmtTime(timeAlive);
     resultWave.textContent = `${stage}-${waveInStage}`;
     resultKills.textContent = String(kills);
     resultGold.textContent = String(gold);
     addWallet(Math.floor(gold));
     elGameOver.classList.remove('hidden');
+    overSelIdx = 0; updateOverSelection();
   }
 
   // Meta progression: wallet and upgrades
@@ -574,8 +692,13 @@
     else { x = randRange(0, canvas.width); y = canvas.height + margin; }
 
     const waveScale = 1 + Math.min(2.0, timeAlive / 120); // up to 3x by 2 minutes
-    const isArcher = Math.random() < Math.min(0.35, 0.1 + timeAlive * 0.005); // grows over time
-    if (isArcher) {
+    // Ranged (archer) spawn tuning: start low, grow slowly, and cap concurrent count
+    const desiredArcherProb = Math.min(0.18, 0.04 + timeAlive * 0.0015); // 4% base, +0.15%/s, cap 18%
+    const archersNow = enemies.reduce((n, e) => n + (e.type === 'archer' ? 1 : 0), 0);
+    const maxArchers = Math.max(2, Math.floor(2 + timeAlive / 45)); // grows slowly with time
+    const wantArcher = Math.random() < desiredArcherProb;
+    const canSpawnArcher = archersNow < maxArchers;
+    if (wantArcher && canSpawnArcher) {
       const e = {
         type: 'archer',
         x, y,
@@ -933,10 +1056,10 @@
   }
 
   function render() {
-    // clear + camera shake
+    // clear + camera shake (only during RUNNING)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
-    if (shake.t > 0) {
+    if (state === 'RUNNING' && shake.t > 0) {
       const p = shake.t / shake.max;
       const dx = (Math.random()*2-1) * shake.mag * p;
       const dy = (Math.random()*2-1) * shake.mag * p;
